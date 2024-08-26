@@ -1,3 +1,12 @@
+from rich.console import Console
+from rich.table import Table
+from rich.text import Text
+from rich.box import ROUNDED
+from rich.columns import Columns
+
+# Inicializar la consola
+console = Console()
+
 # Activos fijos iniciales
 activos = {
     "salario_base": 1788.25,
@@ -68,34 +77,36 @@ valor_irpf = base_irpf * (porcentaje_irpf / 100)
 # Agregar el valor del IRPF al diccionario de deducciones
 deducciones["valor_irpf"] = valor_irpf
 
-# Imprimir los resultados detallados
-print(f"Total de activos antes de deducciones: €{total_activos:.2f}")
-print(f"\nDetalles de la suma de activos:")
+# Imprimir dos líneas en blanco
+console.print("\n")
+console.print("\n")
+
+# Crear las tablas
+table_activos = Table(title=Text("Detalles de la suma de activos", style="bold green"), box=ROUNDED)
+table_activos.add_column("Campo", style="bold")
+table_activos.add_column("Valor (€)", style="bold")
 for key, value in activos.items():
-    print(f"{key}: €{value:.2f}")
+    table_activos.add_row(key, f"{value:.2f}")
 
-# Imprimir resultados específicos
-print(f"\nValor de mejora absorbible después de gastos de comida y transporte: €{activos['mejora_absorbible']:.2f}")
-print(f"Descuento del mes: €{activos['descuento_del_mes']:.2f}")
-print(f"Gastos de comida y transporte: €{activos['gastos_comida_transporte']:.2f}")
-
-# Imprimir el valor_prod_especie desde deducciones
-print(f"\nValor de producion en especie (deducciones): €{deducciones['valor_prod_especie']:.2f}")
-
-# Imprimir valores de tasas y el total de tasas
-print("\nTasas aplicadas:")
+table_tasas = Table(title=Text("Tasas aplicadas:", style="bold red"), box=ROUNDED)
+table_tasas.add_column("Tasa / Deducción", style="bold")
+table_tasas.add_column("Valor (€)", style="bold")
 for nombre, valor in valores_tasas.items():
-    print(f"{nombre}: €{valor:.2f}")
-print(f"Total de aportaciones: €{deducciones['total_aportaciones']:.2f}")
+    table_tasas.add_row(nombre, f"{valor:.2f}")
+table_tasas.add_row("Total de aportaciones", f"{deducciones['total_aportaciones']:.2f}")
+table_tasas.add_row("Valor de producción en especie (deducciones)", f"{deducciones['valor_prod_especie']:.2f}")
+table_tasas.add_row("Valor del IRPF", f"{deducciones['valor_irpf']:.2f}")
 
-# Imprimir el valor del IRPF y la base para el cálculo del IRPF
-print(f"\nBase para el cálculo del IRPF: €{base_irpf:.2f}")
-print(f"Valor del IRPF: €{deducciones['valor_irpf']:.2f}")
+# Imprimir las tablas una al lado de la otra
+console.print(Columns([table_activos, table_tasas]))
+
+# Imprimir la base para el cálculo del IRPF
+console.print(f"\nBase para el cálculo del IRPF: €{base_irpf:.2f}")
 
 # Imprimir el total de deducciones
 total_deducciones = deducciones["valor_prod_especie"] + deducciones["total_aportaciones"] + deducciones["valor_irpf"]
-print(f"\nTotal de deducciones: €{total_deducciones:.2f}")
+console.print(f"\nTotal de deducciones: €{total_deducciones:.2f}")
 
 # Calcular y mostrar el salario del mes
 salario_del_mes = total_activos - total_deducciones
-print(f"\nEl salario del mes es de: €{salario_del_mes:.2f}")
+console.print(f"\n{Text('El salario del mes es de:', style='bold green')} €{salario_del_mes:.2f}")
